@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>1</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>square</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>IVERILOG</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,rst,ix:32,in:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>`define INICIO         4&apos;b0000
+`define RESULTADO1     4&apos;b0001
+`define INICIARV       4&apos;b0010
+`define CONDICION1     4&apos;b0011
+`define CONDICION2     4&apos;b0100
+`define PAR            4&apos;b0101
+`define IMPAR          4&apos;b0110
+`define RESULTADO2     4&apos;b0111
+`define FIN            4&apos;b1000
+
+module square(
+    input clk,
+    input rst,
+    input [31:0] ix,
+    input [31:0] in,
+    output reg [31:0]result
+
+);
+    reg [3:0] curr_state;
+    reg [3:0] next_state;
+    reg [31:0] x, y, n;
+    reg [31:0] nx, ny, nn;
+    reg [31:0] nresult;
+
+    //current state
+    always @ (posedge clk)
+    begin
+        if(rst)
+            curr_state &lt;= `INICIO;
+        else
+        curr_state &lt;= next_state; 
+    end
+
+    //Registers x, y, n, result
+    always @ (posedge clk)
+    begin
+        x &lt;= nx;
+        y &lt;= ny;
+        n &lt;= nn;
+        result &lt;= nresult;
+    end
+
+    //Next registers values
+    always @ (*)
+    begin
+        nx = x;
+        ny = y;
+        nn = n;
+        nresult = result;
+
+        case (curr_state)
+            `RESULTADO1: nresult = 32&apos;d1;
+            `INICIARV: begin
+                nx = ix;
+                ny = 1;
+                nn = in;
+            end
+            `PAR: begin
+                nx = x * x;
+                nn = n &gt;&gt; 1;
+            end
+            `IMPAR: begin
+                ny = x * y;
+                nx = x * x;
+                nn = (n - 1) &gt;&gt; 1;
+            end
+            `RESULTADO2: nresult = x * y;
+        endcase
+    end
+
+    //Next state
+    always @ (*)
+    begin
+        case (curr_state)
+        `INICIO:
+            if(in == 32&apos;d0)
+                next_state = `RESULTADO1;
+            else
+                next_state = `INICIARV;
+        `RESULTADO1:
+            next_state = `FIN;
+        `INICIARV:
+            next_state = `CONDICION1;
+        `CONDICION1:
+            if(n &gt; 32&apos;d1)
+                next_state = `CONDICION2;
+            else
+                next_state = `RESULTADO2;
+        `CONDICION2:
+            if(n[0] == 1&apos;b0)
+                next_state = `PAR;
+            else
+                next_state = `IMPAR;
+        `PAR:
+            next_state = `CONDICION1;
+        `IMPAR:
+            next_state = `CONDICION1;
+        `RESULTADO2:
+            next_state = `FIN;
+        `FIN:
+            next_state = `FIN;
+        endcase   
+    end
+endmodule</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>result:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+      </elementAttributes>
+      <pos x="560" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>resultado</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="760" y="280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>clk</string>
+        </entry>
+        <entry>
+          <string>Frequency</string>
+          <int>500</int>
+        </entry>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>rst</string>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>x</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>n</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="380"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="500" y="240"/>
+      <p2 x="560" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="320"/>
+      <p2 x="500" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="320"/>
+      <p2 x="560" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="260"/>
+      <p2 x="560" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="680" y="280"/>
+      <p2 x="760" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="200"/>
+      <p2 x="500" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="300"/>
+      <p2 x="560" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="380"/>
+      <p2 x="520" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="200"/>
+      <p2 x="500" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="300"/>
+      <p2 x="500" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="320"/>
+      <p2 x="520" y="380"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

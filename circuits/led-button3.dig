@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>1</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>Button</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>pulsador</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-60" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>LED</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Color</string>
+          <awt-color>
+            <red>102</red>
+            <green>255</green>
+            <blue>51</blue>
+            <alpha>255</alpha>
+          </awt-color>
+        </entry>
+      </elementAttributes>
+      <pos x="400" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>clk</string>
+        </entry>
+        <entry>
+          <string>Frequency</string>
+          <int>800</int>
+        </entry>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="-80" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>LedButton</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>IVERILOG</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,p</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>module LedButton (
+    input clk,
+    input p,
+    output reg led
+);
+    reg [1:0] curr_state;
+    // Register  Current State
+    reg [1:0] next_state;
+
+    always @ (posedge clk)
+        curr_state = next_state;
+
+    // Mux LED Status
+    always @ (curr_state)
+    begin
+        case (curr_state)
+            2&apos;d0: led = 1&apos;b0;
+            2&apos;d1: led = 1&apos;b0;
+            2&apos;d2: led = 1&apos;b1;
+            2&apos;d3: led = 1&apos;b1;
+        endcase   
+    end
+
+    // Muxes Next State
+always @ (curr_state or p)
+    begin
+        case (curr_state)
+            2&apos;d0: next_state = p? 2&apos;d1 : 2&apos;d0;
+            2&apos;d1: next_state = p? 2&apos;d1 : 2&apos;d2;
+            2&apos;d2: next_state = p? 2&apos;d3 : 2&apos;d2;
+            2&apos;d3: next_state = p? 2&apos;d3 : 2&apos;d0;
+            default:
+            next_state = 2&apos;d0;
+        endcase   
+    end
+endmodule</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>led</string>
+        </entry>
+      </elementAttributes>
+      <pos x="120" y="260"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="360" y="160"/>
+      <p2 x="400" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-80" y="180"/>
+      <p2 x="80" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="80" y="260"/>
+      <p2 x="120" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-60" y="340"/>
+      <p2 x="80" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="180" y="280"/>
+      <p2 x="360" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="80" y="300"/>
+      <p2 x="120" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="80" y="180"/>
+      <p2 x="80" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="80" y="300"/>
+      <p2 x="80" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="160"/>
+      <p2 x="360" y="280"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

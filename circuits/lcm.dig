@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>1</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>lcm</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>IVERILOG</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,rst,ia:32,ib:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>`define INICIO      4&apos;b0000
+`define INICIARV    4&apos;b0001 
+`define CONDICION1  4&apos;b0010
+`define AMAYOR      4&apos;b0011
+`define BMAYOR      4&apos;b0100
+`define CONDICION2  4&apos;b0101
+`define CICLO       4&apos;b0110
+`define VERDADEROC  4&apos;b0111
+`define FALSOC      4&apos;b1000
+`define FIN         4&apos;b1001
+
+module lcm(
+    input clk,
+    input rst,
+    input [31:0] ia,
+    input [31:0] ib,
+    output reg [31:0]result
+
+);
+    reg [3:0] curr_state;
+    reg [3:0] next_state;
+    reg [31:0] a,b,lcm,step;
+    reg [31:0] na,nb,nlcm,nstep;
+    reg [31:0] nresult;
+
+    //current state
+    always @ (posedge clk)
+    begin
+        if(rst)
+            curr_state &lt;= `INICIO;
+        else
+            curr_state &lt;= next_state; 
+    end
+
+    //registers 
+    always @ (posedge clk)
+    begin
+        a &lt;= na;
+        b &lt;= nb;
+        lcm &lt;= nlcm;
+        step &lt;= nstep;
+        result &lt;= nresult;
+    end
+
+    //next values
+    always @ (*)
+    begin
+        na = a;
+        nb = b;
+        nlcm = lcm;
+        nstep = step;
+        nresult = result;
+
+        case(curr_state)
+        `INICIARV: begin
+            na = ia;
+            nb = ib;
+            nlcm = lcm;
+            nstep = step;
+            nresult = result;
+        end
+        `AMAYOR: begin
+            nlcm = a;
+            nstep = a;
+        end
+        `BMAYOR: begin
+            nlcm = b;
+            nstep = b;
+        end
+        `FALSOC: begin
+            nlcm = nlcm + nstep;
+        end
+        `VERDADEROC: nresult = nlcm;
+        endcase
+    end
+
+    //next state
+    always @ (*)
+    begin
+        case(curr_state)
+        `INICIO:
+            next_state = `INICIARV;
+        `INICIARV:
+            next_state = `CONDICION1;
+        `CONDICION1: 
+            if(a &gt; b)
+                next_state = `AMAYOR;
+            else
+                next_state = `BMAYOR;
+        `AMAYOR:
+            next_state = `CICLO;
+        `BMAYOR:
+            next_state = `CICLO;
+        `CICLO:
+            next_state = `CONDICION2;
+        `CONDICION2:
+            if ((nlcm%a)==0 &amp;&amp; (lcm%b==0))
+                next_state = `VERDADEROC;
+            else
+                next_state = `FALSOC;
+        `VERDADEROC: 
+            next_state = `FIN;
+        `FALSOC:
+            next_state = `CICLO;
+        `FIN:
+            next_state = `FIN;
+            
+        endcase
+    end
+endmodule</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>result:32</string>
+        </entry>
+      </elementAttributes>
+      <pos x="540" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>resultado</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Frequency</string>
+          <int>500</int>
+        </entry>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="460" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Button</elementName>
+      <elementAttributes/>
+      <pos x="460" y="320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>n1</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="400" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>n2</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="420"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="460" y="320"/>
+      <p2 x="540" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="600" y="340"/>
+      <p2 x="660" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="260"/>
+      <p2 x="520" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="420"/>
+      <p2 x="500" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="400" y="360"/>
+      <p2 x="540" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="300"/>
+      <p2 x="540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="380"/>
+      <p2 x="540" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="380"/>
+      <p2 x="500" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="260"/>
+      <p2 x="520" y="300"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>

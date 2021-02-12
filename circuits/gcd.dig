@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>1</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>gcd</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>IVERILOG</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,rst,ia:32,ib:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>`define INICIO      3&apos;b000
+`define INICIARV    3&apos;b001
+`define DIFERENTE   3&apos;b010
+`define RESULTADO   3&apos;b011
+`define FIN         3&apos;b100
+`define MAYORQUE    3&apos;b101
+`define AMAYOR      3&apos;b110
+`define AMENOR      3&apos;b111
+
+module gcd(
+    input clk,
+    input rst,
+    input [31:0] ia,
+    input [31:0] ib,
+    output reg [31:0]result
+);
+
+    reg [2:0] curr_state;
+    reg [2:0] next_state;
+    reg [31:0] a, b;
+    reg [31:0] na, nb;
+    reg [31:0] nresult;
+
+    //current state
+    always @ (posedge clk)
+    begin
+        if(rst)
+            curr_state &lt;= `INICIO;
+        else
+            curr_state &lt;= next_state;
+    end
+
+    //registers a, b, result
+    always @ (posedge clk)
+    begin
+        a &lt;= na;
+        b &lt;= nb;
+        result &lt;= nresult;
+    end
+
+    //next register values
+    always @ (*)
+    begin
+        na = a;
+        nb = b;
+        nresult = result;
+
+        case (curr_state)
+        `RESULTADO: nresult = a;
+        `INICIARV: begin
+            na = ia;
+            nb = ib;
+        end
+        `AMAYOR: begin
+            na = a - b;
+        end
+        `AMENOR:begin
+            nb = b - a;
+        end
+        endcase
+    end
+
+    //next state
+    always @ (*)
+    begin
+        case(curr_state)
+        `INICIO:
+            next_state = `INICIARV;
+        `INICIARV:
+            next_state = `DIFERENTE;
+        `DIFERENTE: 
+            if ( a != b )
+                next_state = `MAYORQUE;
+            else
+                next_state = `RESULTADO;
+        `MAYORQUE:
+            if (a &gt; b)
+                next_state = `AMAYOR;
+            else
+                next_state = `AMENOR;
+        `AMAYOR:
+            next_state = `DIFERENTE;
+        `AMENOR:
+            next_state = `DIFERENTE;
+        `RESULTADO:
+            next_state = `FIN;
+        `FIN:
+            next_state = `FIN;
+        endcase
+    end
+endmodule</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>result:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+      </elementAttributes>
+      <pos x="540" y="280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>a</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>b</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>resultado</string>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="740" y="320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>clk</string>
+        </entry>
+        <entry>
+          <string>Frequency</string>
+          <int>500</int>
+        </entry>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>rst</string>
+        </entry>
+      </elementAttributes>
+      <pos x="440" y="300"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="740" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="260"/>
+      <p2 x="520" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="340"/>
+      <p2 x="540" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="280"/>
+      <p2 x="540" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="360"/>
+      <p2 x="540" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="300"/>
+      <p2 x="540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="380"/>
+      <p2 x="520" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="260"/>
+      <p2 x="520" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="360"/>
+      <p2 x="520" y="380"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
